@@ -18,13 +18,13 @@ impl Default for Alignment {
 }
 
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
-pub struct DisplayCell {
+pub struct GridCell {
     pub contents: String,
     pub width: usize,
     pub alignment: Alignment,
 }
 
-impl DisplayCell {
+impl GridCell {
     pub fn write<F: fmt::Write>(&self, f: &mut F, width: usize) -> fmt::Result {
         let pad_width: usize = if width <= self.width {
             0
@@ -44,7 +44,7 @@ impl DisplayCell {
     }
 }
 
-impl From<String> for DisplayCell {
+impl From<String> for GridCell {
     fn from(value: String) -> Self {
         let width = UnicodeWidthStr::width(&*value);
 
@@ -58,7 +58,7 @@ impl From<String> for DisplayCell {
 
 #[derive(Debug, Default)]
 pub struct Grid {
-    cells_vec: Vec<DisplayCell>,
+    cells_vec: Vec<GridCell>,
     num_spaces: usize,
     direction: Direction,
 }
@@ -76,7 +76,7 @@ impl Grid {
         self.cells_vec.len()
     }
 
-    pub fn add(&mut self, cell: DisplayCell) {
+    pub fn add(&mut self, cell: GridCell) {
         self.cells_vec.push(cell);
     }
 
