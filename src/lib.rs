@@ -57,27 +57,23 @@ impl From<String> for GridCell {
 }
 
 #[derive(Debug, Default)]
-pub struct Grid {
-    cells_vec: Vec<GridCell>,
+pub struct Grid<'a> {
+    cells_slice: &'a [GridCell],
     num_spaces: usize,
     direction: Direction,
 }
 
-impl Grid {
-    pub fn new(initial_capacity: usize, num_spaces: usize, direction: Direction) -> Self {
-        Self {
-            cells_vec: Vec::with_capacity(initial_capacity),
-            num_spaces: num_spaces,
-            direction: direction,
+impl<'a> Grid<'a> {
+    pub fn new(num_spaces: usize, direction: Direction, cells_slice: &[GridCell]) -> Grid {
+        Grid {
+            cells_slice,
+            num_spaces,
+            direction,
         }
     }
 
     pub fn total_cell_count(&self) -> usize {
-        self.cells_vec.len()
-    }
-
-    pub fn add(&mut self, cell: GridCell) {
-        self.cells_vec.push(cell);
+        self.cells_slice.len()
     }
 
     pub fn fit_into_columns(&self, num_columns: usize) -> Display<'_> {
@@ -90,14 +86,14 @@ impl Grid {
     }
 
     pub fn fit_into_width(&self, display_width: usize) -> Option<Display<'_>> {
-        if self.cells_vec.is_empty() {
+        if self.cells_slice.is_empty() {
             return Some(Display {
                 dimentions: Dimentions::one_row(0),
                 grid: self,
             });
         }
         let max_cell_width: usize = self
-            .cells_vec
+            .cells_slice
             .iter()
             .map(|cell| cell.width)
             .max()
@@ -108,7 +104,11 @@ impl Grid {
         if max_cell_width >= display_width {
             None
         } else {
-            let total_width: usize = (self.cells_vec.iter().map(|cell| cell.width).sum::<usize>())
+            let total_width: usize = (self
+                .cells_slice
+                .iter()
+                .map(|cell| cell.width)
+                .sum::<usize>())
                 + (self.total_cell_count() - 1) * self.num_spaces;
 
             // if total width width is <= display_width, display all `DisplayCell` in one row
@@ -155,7 +155,7 @@ impl Grid {
         let num_rows = usize_div_ceil(self.total_cell_count(), num_columns);
         let mut column_widths: Vec<usize> = vec![0; num_columns];
 
-        for (cell_index, cell) in self.cells_vec.iter().enumerate() {
+        for (cell_index, cell) in self.cells_slice.iter().enumerate() {
             let column_index = match self.direction {
                 Direction::LeftToRight => cell_index % num_columns,
                 Direction::TopToBottom => cell_index / num_rows,
@@ -174,7 +174,7 @@ impl Grid {
 #[derive(Debug)]
 pub struct Display<'a> {
     dimentions: Dimentions,
-    grid: &'a Grid,
+    grid: &'a Grid<'a>,
 }
 
 impl fmt::Display for Display<'_> {
@@ -202,7 +202,7 @@ impl fmt::Display for Display<'_> {
                 }
 
                 cell_count += 1;
-                let cell = &self.grid.cells_vec[cell_index];
+                let cell = &self.grid.cells_slice[cell_index];
 
                 // if (the current column is the last column or is the last cell)
                 // and the cell is left aligned, the cell does not need to be
