@@ -1,6 +1,18 @@
 use super::*;
 
 #[test]
+fn test_gridcell_from_string() {
+    assert_eq!(
+        GridCell::from(String::from("file")),
+        GridCell {
+            contents: String::from("file"),
+            width: 4,
+            alignment: Alignment::Left
+        }
+    );
+}
+
+#[test]
 fn test_no_cells() {
     let cells_slice: [GridCell; 0] = [];
 

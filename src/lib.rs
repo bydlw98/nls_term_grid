@@ -1,3 +1,5 @@
+#![doc = include_str!("../README.md")]
+
 use std::fmt;
 
 use unicode_width::UnicodeWidthStr;
@@ -5,9 +7,28 @@ use unicode_width::UnicodeWidthStr;
 #[cfg(test)]
 mod tests;
 
+/// Indicates alignment of contents when padding is required
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum Alignment {
+    /// Padding is added to right side of text
+    ///
+    /// ## Example
+    ///
+    /// ```text
+    /// file
+    /// file1
+    /// file12
+    /// ```
     Left,
+    /// Padding is added to left side of text
+    ///
+    /// ## Example
+    ///
+    /// ```text
+    ///   file
+    ///  file1
+    /// file12
+    /// ```
     Right,
 }
 
@@ -17,15 +38,19 @@ impl Default for Alignment {
     }
 }
 
+/// A textual string containing its display width and alignment
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub struct GridCell {
+    /// The textual string displayed when written
     pub contents: String,
+    /// The display width of contents in columns
     pub width: usize,
+    /// Whether contents is (left/right) aligned when padding is required
     pub alignment: Alignment,
 }
 
 impl GridCell {
-    pub fn write<F: fmt::Write>(&self, f: &mut F, width: usize) -> fmt::Result {
+    pub(crate) fn write<F: fmt::Write>(&self, f: &mut F, width: usize) -> fmt::Result {
         let pad_width: usize = if width <= self.width {
             0
         } else {
@@ -56,6 +81,8 @@ impl From<String> for GridCell {
     }
 }
 
+
+/// The main struct used to format GridCells in a grid like format similar to `ls`
 #[derive(Debug, Default)]
 pub struct Grid<'a> {
     cells_slice: &'a [GridCell],
@@ -64,6 +91,7 @@ pub struct Grid<'a> {
 }
 
 impl<'a> Grid<'a> {
+    /// Create a new Grid
     pub fn new(num_spaces: usize, direction: Direction, cells_slice: &[GridCell]) -> Grid {
         Grid {
             cells_slice,
@@ -72,10 +100,11 @@ impl<'a> Grid<'a> {
         }
     }
 
-    pub fn total_cell_count(&self) -> usize {
+    pub(crate) fn total_cell_count(&self) -> usize {
         self.cells_slice.len()
     }
 
+    /// Returns a displayable containing the specified number of columns
     pub fn fit_into_columns(&self, num_columns: usize) -> Display<'_> {
         let dimentions = self.calculate_dimentions(num_columns);
 
@@ -85,6 +114,9 @@ impl<'a> Grid<'a> {
         }
     }
 
+    /// Returns a well packed displayable grid fitted within display width
+    ///
+    /// Returns `None` if one of the GridCell contains a width greator than the display width
     pub fn fit_into_width(&self, display_width: usize) -> Option<Display<'_>> {
         if self.cells_slice.is_empty() {
             return Some(Display {
@@ -171,6 +203,7 @@ impl<'a> Grid<'a> {
     }
 }
 
+/// The displayable represntation of [`Grid`](struct.Grid.html)
 #[derive(Debug)]
 pub struct Display<'a> {
     dimentions: Dimentions,
@@ -223,9 +256,12 @@ impl fmt::Display for Display<'_> {
     }
 }
 
+/// Indicates direction GridCells should be written in
 #[derive(Debug, PartialEq, Eq)]
 pub enum Direction {
+    /// Writes GridCells from left to right, like a typewriter
     LeftToRight,
+    /// Writes GridCells from top to bottom, like how `ls` lists files by default
     TopToBottom,
 }
 
@@ -246,7 +282,7 @@ impl Dimentions {
         self.column_widths.iter().sum::<usize>() + ((self.column_widths.len() - 1) * spaces)
     }
 
-    /// for dimentions to be well packed, the following must occur:
+    /// For dimentions to be well packed, the following must occur:
     /// 1. the last column must have less than or equal to the number of rows
     /// 2. there should be as few columns as possible, this is done by checking if
     ///     the current number of rows chosen to be used is the same as the previous
@@ -266,6 +302,8 @@ impl Dimentions {
     }
 }
 
+/// Calculate the quotient of `lhs` and `rhs`, rounding the result towards positive infinity
+///
 /// div_ceil implementation is taken from Rust Core 1.73.0 stable
 fn usize_div_ceil(lhs: usize, rhs: usize) -> usize {
     let d = lhs / rhs;
