@@ -1,7 +1,15 @@
 [package]
-name = "nls-term-grid"
+name = "nls_term_grid"
 version = "0.1.0"
 edition = "2021"
+categories = ["command-line-interface"]
+description = "Library for arranging textual data in a grid format similar to ls"
+homepage = "https://github.com/bydlw98/nls_term_grid"
+keywords = ["grid", "no_std"]
+license = "MIT OR Apache-2.0"
+readme = "README.md"
+repository = "https://github.com/bydlw98/nls_term_grid"
+rust-version = "1.70.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

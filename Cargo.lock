@@ -3,7 +3,7 @@
 version = 3
 
 [[package]]
-name = "nls-term-grid"
+name = "nls_term_grid"
 version = "0.1.0"
 dependencies = [
  "unicode-width",

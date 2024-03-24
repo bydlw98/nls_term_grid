@@ -1,4 +1,4 @@
-# nls-term-grid
+# nls_term_grid
 
 This library arranges textual data in a grid format similar to `ls`
 
