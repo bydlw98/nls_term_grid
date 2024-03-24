@@ -1,6 +1,12 @@
+#![no_std]
 #![doc = include_str!("../README.md")]
 
-use std::fmt;
+extern crate alloc;
+
+use alloc::string::String;
+use alloc::vec;
+use alloc::vec::Vec;
+use core::fmt;
 
 use unicode_width::UnicodeWidthStr;
 
@@ -80,7 +86,6 @@ impl From<String> for GridCell {
         }
     }
 }
-
 
 /// The main struct used to format GridCells in a grid like format similar to `ls`
 #[derive(Debug, Default)]

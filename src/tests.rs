@@ -1,5 +1,9 @@
 use super::*;
 
+extern crate std;
+
+use std::prelude::rust_2021::*;
+
 #[test]
 fn test_gridcell_from_string() {
     assert_eq!(
