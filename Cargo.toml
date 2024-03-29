@@ -1,9 +1,10 @@
 [package]
 name = "nls_term_grid"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 categories = ["command-line-interface"]
 description = "Library for arranging textual data in a grid format similar to ls"
+exclude = ["/.github/"]
 homepage = "https://github.com/bydlw98/nls_term_grid"
 keywords = ["grid", "no_std"]
 license = "MIT OR Apache-2.0"
