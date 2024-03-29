@@ -1,5 +1,10 @@
 # nls_term_grid
 
+[![CICD](https://github.com/bydlw98/nls_term_grid/actions/workflows/CICD.yml/badge.svg)](https://github.com/bydlw98/nls_term_grid/actions/workflows/CICD.yml)
+[![Crates.io](https://img.shields.io/crates/v/nls_term_grid)](https://crates.io/crates/nls_term_grid)
+[![Docs.rs](https://img.shields.io/docsrs/nls_term_grid)](https://docs.rs/nls_term_grid)
+![License](https://img.shields.io/crates/l/nls_term_grid)
+
 This library arranges textual data in a grid format similar to `ls`
 
 ---
