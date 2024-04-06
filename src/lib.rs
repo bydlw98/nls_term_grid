@@ -40,6 +40,7 @@ pub enum Alignment {
 }
 
 impl Default for Alignment {
+    #[inline]
     fn default() -> Self {
         Self::Left
     }
@@ -114,6 +115,7 @@ impl<'cells, 'seperator> Grid<'cells, 'seperator> {
         }
     }
 
+    #[inline]
     pub(crate) fn total_cell_count(&self) -> usize {
         self.cells.len()
     }
@@ -271,6 +273,7 @@ pub enum Direction {
 }
 
 impl Default for Direction {
+    #[inline]
     fn default() -> Self {
         Self::LeftToRight
     }
@@ -293,6 +296,7 @@ impl Dimentions {
     ///     the current number of rows chosen to be used is the same as the previous
     ///     well packed dimentions. If it is the same, the previous well packed dimentions
     ///     is more well packed due to it having fewer columns
+    #[inline]
     pub fn is_well_packed(&self, cell_count: usize, previous_num_rows: usize) -> bool {
         let last_col_cell_count = cell_count % (self.column_widths.len() - 1);
 
@@ -310,6 +314,7 @@ impl Dimentions {
 /// Calculate the quotient of `lhs` and `rhs`, rounding the result towards positive infinity
 ///
 /// div_ceil implementation is taken from Rust Core 1.73.0 stable
+#[inline]
 fn usize_div_ceil(lhs: usize, rhs: usize) -> usize {
     let d = lhs / rhs;
     let r = lhs % rhs;
