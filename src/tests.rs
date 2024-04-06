@@ -18,14 +18,14 @@ fn test_gridcell_from_string() {
 
 #[test]
 fn test_no_cells() {
-    let cells_slice: [GridCell; 0] = [];
+    let cells: [GridCell; 0] = [];
 
-    let grid = Grid::new("  ", Direction::LeftToRight, &cells_slice);
+    let grid = Grid::new("  ", Direction::LeftToRight, &cells);
     let display = grid.fit_into_width(80).unwrap();
 
     assert_eq!(display.to_string(), "\n");
 
-    let grid = Grid::new("  ", Direction::TopToBottom, &cells_slice);
+    let grid = Grid::new("  ", Direction::TopToBottom, &cells);
     let display = grid.fit_into_width(80).unwrap();
 
     assert_eq!(display.to_string(), "\n");
@@ -33,14 +33,14 @@ fn test_no_cells() {
 
 #[test]
 fn test_one_cell() {
-    let cells_slice: [GridCell; 1] = [GridCell::from(String::from("file"))];
+    let cells: [GridCell; 1] = [GridCell::from(String::from("file"))];
 
-    let grid = Grid::new("  ", Direction::LeftToRight, &cells_slice);
+    let grid = Grid::new("  ", Direction::LeftToRight, &cells);
     let display = grid.fit_into_width(80).unwrap();
 
     assert_eq!(display.to_string(), "file\n");
 
-    let grid = Grid::new("  ", Direction::TopToBottom, &cells_slice);
+    let grid = Grid::new("  ", Direction::TopToBottom, &cells);
     let display = grid.fit_into_width(80).unwrap();
 
     assert_eq!(display.to_string(), "file\n");
@@ -48,24 +48,24 @@ fn test_one_cell() {
 
 #[test]
 fn test_fit_into_width_cell_longer_than_display_width() {
-    let cells_slice: [GridCell; 3] = [
+    let cells: [GridCell; 3] = [
         GridCell::from(String::from("file1")),
         GridCell::from(String::from("file11")),
         GridCell::from(String::from("file111")),
     ];
 
-    let grid = Grid::new("  ", Direction::LeftToRight, &cells_slice);
+    let grid = Grid::new("  ", Direction::LeftToRight, &cells);
 
     assert!(grid.fit_into_width(6).is_none());
 
-    let grid = Grid::new("  ", Direction::TopToBottom, &cells_slice);
+    let grid = Grid::new("  ", Direction::TopToBottom, &cells);
 
     assert!(grid.fit_into_width(6).is_none());
 }
 
 #[test]
 fn test_fit_into_width_fit_into_one_line() {
-    let cells_slice: [GridCell; 5] = [
+    let cells: [GridCell; 5] = [
         GridCell::from(String::from("file1")),
         GridCell::from(String::from("file2")),
         GridCell::from(String::from("file3")),
@@ -73,12 +73,12 @@ fn test_fit_into_width_fit_into_one_line() {
         GridCell::from(String::from("file5")),
     ];
 
-    let grid = Grid::new("  ", Direction::LeftToRight, &cells_slice);
+    let grid = Grid::new("  ", Direction::LeftToRight, &cells);
     let display = grid.fit_into_width(35).unwrap();
 
     assert_eq!(display.to_string(), "file1  file2  file3  file4  file5\n");
 
-    let grid = Grid::new("  ", Direction::LeftToRight, &cells_slice);
+    let grid = Grid::new("  ", Direction::LeftToRight, &cells);
     let display = grid.fit_into_width(35).unwrap();
 
     assert_eq!(display.to_string(), "file1  file2  file3  file4  file5\n");
@@ -87,7 +87,7 @@ fn test_fit_into_width_fit_into_one_line() {
 #[test]
 fn test_fit_into_width_fit_into_one_line_color() {
     #[rustfmt::skip]
-    let cells_slice: [GridCell; 5] = [
+    let cells: [GridCell; 5] = [
         GridCell { contents: String::from("\x1b[31mfile1\x1b[0m"), width: 5, alignment: Alignment::Left },
         GridCell { contents: String::from("\x1b[32mfile2\x1b[0m"), width: 5, alignment: Alignment::Left },
         GridCell { contents: String::from("\x1b[33mfile3\x1b[0m"), width: 5, alignment: Alignment::Left },
@@ -95,7 +95,7 @@ fn test_fit_into_width_fit_into_one_line_color() {
         GridCell { contents: String::from("\x1b[35mfile5\x1b[0m"), width: 5, alignment: Alignment::Left },
     ];
 
-    let grid = Grid::new("  ", Direction::LeftToRight, &cells_slice);
+    let grid = Grid::new("  ", Direction::LeftToRight, &cells);
     let display = grid.fit_into_width(35).unwrap();
 
     // if evaluated in a output device which renders ansi escape sequences
@@ -103,7 +103,7 @@ fn test_fit_into_width_fit_into_one_line_color() {
     // "file1  file2  file3  file4  file5\n"
     assert_eq!(display.to_string(), "\x1b[31mfile1\x1b[0m  \x1b[32mfile2\x1b[0m  \x1b[33mfile3\x1b[0m  \x1b[34mfile4\x1b[0m  \x1b[35mfile5\x1b[0m\n");
 
-    let grid = Grid::new("  ", Direction::TopToBottom, &cells_slice);
+    let grid = Grid::new("  ", Direction::TopToBottom, &cells);
     let display = grid.fit_into_width(35).unwrap();
 
     // if evaluated in a output device which renders ansi escape sequences
@@ -115,7 +115,7 @@ fn test_fit_into_width_fit_into_one_line_color() {
 #[test]
 fn test_fit_into_width_more_than_one_line_lefttoright() {
     #[rustfmt::skip]
-    let cells_slice: [GridCell; 15] = [
+    let cells: [GridCell; 15] = [
         GridCell::from(String::from("file10")),
         GridCell::from(String::from("file20")),
         GridCell::from(String::from("file3")),
@@ -135,7 +135,7 @@ fn test_fit_into_width_more_than_one_line_lefttoright() {
         GridCell::from(String::from("file50")),
     ];
 
-    let grid = Grid::new("  ", Direction::LeftToRight, &cells_slice);
+    let grid = Grid::new("  ", Direction::LeftToRight, &cells);
     let display = grid.fit_into_width(35).unwrap();
 
     assert_eq!(
@@ -150,7 +150,7 @@ fn test_fit_into_width_more_than_one_line_lefttoright() {
 #[test]
 fn test_fit_into_width_more_than_one_line_lefttoright_color() {
     #[rustfmt::skip]
-    let cells_slice: [GridCell; 15] = [
+    let cells: [GridCell; 15] = [
         GridCell { contents: String::from("\x1b[31mfile10\x1b[0m"), width: 6, alignment: Alignment::Left },
         GridCell { contents: String::from("\x1b[32mfile20\x1b[0m"), width: 6, alignment: Alignment::Left },
         GridCell { contents: String::from("\x1b[33mfile3\x1b[0m"), width: 5, alignment: Alignment::Left },
@@ -170,7 +170,7 @@ fn test_fit_into_width_more_than_one_line_lefttoright_color() {
         GridCell { contents: String::from("\x1b[35mfile50\x1b[0m"), width: 6, alignment: Alignment::Left },
     ];
 
-    let grid = Grid::new("  ", Direction::LeftToRight, &cells_slice);
+    let grid = Grid::new("  ", Direction::LeftToRight, &cells);
     let display = grid.fit_into_width(35).unwrap();
 
     // if evaluated in a output device which renders ansi escape sequences
@@ -191,7 +191,7 @@ fn test_fit_into_width_more_than_one_line_lefttoright_color() {
 #[test]
 fn test_fit_into_width_more_than_one_line_toptobottom() {
     #[rustfmt::skip]
-    let cells_slice: [GridCell; 15] = [
+    let cells: [GridCell; 15] = [
         GridCell::from(String::from("file10")),
         GridCell::from(String::from("file20")),
         GridCell::from(String::from("file3")),
@@ -211,7 +211,7 @@ fn test_fit_into_width_more_than_one_line_toptobottom() {
         GridCell::from(String::from("file50")),
     ];
 
-    let grid = Grid::new("  ", Direction::TopToBottom, &cells_slice);
+    let grid = Grid::new("  ", Direction::TopToBottom, &cells);
     let display = grid.fit_into_width(35).unwrap();
 
     assert_eq!(
@@ -226,7 +226,7 @@ fn test_fit_into_width_more_than_one_line_toptobottom() {
 #[test]
 fn test_fit_into_width_more_than_one_line_toptobottom_color() {
     #[rustfmt::skip]
-    let cells_slice: [GridCell; 15] = [
+    let cells: [GridCell; 15] = [
         GridCell { contents: String::from("\x1b[31mfile10\x1b[0m"), width: 6, alignment: Alignment::Left },
         GridCell { contents: String::from("\x1b[32mfile20\x1b[0m"), width: 6, alignment: Alignment::Left },
         GridCell { contents: String::from("\x1b[33mfile3\x1b[0m"), width: 5, alignment: Alignment::Left },
@@ -246,7 +246,7 @@ fn test_fit_into_width_more_than_one_line_toptobottom_color() {
         GridCell { contents: String::from("\x1b[35mfile50\x1b[0m"), width: 6, alignment: Alignment::Left },
     ];
 
-    let grid = Grid::new("  ", Direction::TopToBottom, &cells_slice);
+    let grid = Grid::new("  ", Direction::TopToBottom, &cells);
     let display = grid.fit_into_width(35).unwrap();
 
     // if evaluated in a output device which renders ansi escape sequences
@@ -267,7 +267,7 @@ fn test_fit_into_width_more_than_one_line_toptobottom_color() {
 #[test]
 fn test_fit_into_columns_lefttoright_same_alignment() {
     #[rustfmt::skip]
-    let cells_slice: [GridCell; 15] = [
+    let cells: [GridCell; 15] = [
         GridCell::from(String::from("file10")),
         GridCell::from(String::from("file20")),
         GridCell::from(String::from("file3")),
@@ -287,7 +287,7 @@ fn test_fit_into_columns_lefttoright_same_alignment() {
         GridCell::from(String::from("file50")),
     ];
 
-    let grid = Grid::new("  ", Direction::LeftToRight, &cells_slice);
+    let grid = Grid::new("  ", Direction::LeftToRight, &cells);
     let display = grid.fit_into_columns(5);
 
     assert_eq!(
@@ -301,7 +301,7 @@ fn test_fit_into_columns_lefttoright_same_alignment() {
 #[test]
 fn test_fit_into_columns_toptobottom_same_alignment() {
     #[rustfmt::skip]
-    let cells_slice: [GridCell; 15] = [
+    let cells: [GridCell; 15] = [
         GridCell::from(String::from("file10")),
         GridCell::from(String::from("file20")),
         GridCell::from(String::from("file3")),
@@ -321,7 +321,7 @@ fn test_fit_into_columns_toptobottom_same_alignment() {
         GridCell::from(String::from("file50")),
     ];
 
-    let grid = Grid::new("  ", Direction::TopToBottom, &cells_slice);
+    let grid = Grid::new("  ", Direction::TopToBottom, &cells);
     let display = grid.fit_into_columns(5);
 
     assert_eq!(
@@ -335,7 +335,7 @@ fn test_fit_into_columns_toptobottom_same_alignment() {
 #[test]
 fn test_fit_into_columns_lefttoright_different_alignments() {
     #[rustfmt::skip]
-    let cells_slice: [GridCell; 15] = [
+    let cells: [GridCell; 15] = [
         GridCell { contents: String::from("file10"), width: 6, alignment: Alignment::Left },
         GridCell { contents: String::from("file20"), width: 6, alignment: Alignment::Right },
         GridCell { contents: String::from("file3"), width: 5, alignment: Alignment::Left },
@@ -355,7 +355,7 @@ fn test_fit_into_columns_lefttoright_different_alignments() {
         GridCell { contents: String::from("file50"), width: 6, alignment: Alignment::Left },
     ];
 
-    let grid = Grid::new("  ", Direction::LeftToRight, &cells_slice);
+    let grid = Grid::new("  ", Direction::LeftToRight, &cells);
     let display = grid.fit_into_columns(5);
 
     assert_eq!(
@@ -369,7 +369,7 @@ fn test_fit_into_columns_lefttoright_different_alignments() {
 #[test]
 fn test_fit_into_columns_lefttoright_different_alignments_color() {
     #[rustfmt::skip]
-    let cells_slice: [GridCell; 15] = [
+    let cells: [GridCell; 15] = [
         GridCell { contents: String::from("\x1b[31mfile10\x1b[0m"), width: 6, alignment: Alignment::Left },
         GridCell { contents: String::from("\x1b[32mfile20\x1b[0m"), width: 6, alignment: Alignment::Right },
         GridCell { contents: String::from("\x1b[33mfile3\x1b[0m"), width: 5, alignment: Alignment::Left },
@@ -389,7 +389,7 @@ fn test_fit_into_columns_lefttoright_different_alignments_color() {
         GridCell { contents: String::from("\x1b[35mfile50\x1b[0m"), width: 6, alignment: Alignment::Left },
     ];
 
-    let grid = Grid::new("  ", Direction::LeftToRight, &cells_slice);
+    let grid = Grid::new("  ", Direction::LeftToRight, &cells);
     let display = grid.fit_into_columns(5);
 
     // if evaluated in a output device which renders ansi escape sequences
@@ -408,7 +408,7 @@ fn test_fit_into_columns_lefttoright_different_alignments_color() {
 #[test]
 fn test_fit_into_columns_toptobottom_different_alignments() {
     #[rustfmt::skip]
-    let cells_slice: [GridCell; 15] = [
+    let cells: [GridCell; 15] = [
         GridCell { contents: String::from("file10"), width: 6, alignment: Alignment::Left },
         GridCell { contents: String::from("file20"), width: 6, alignment: Alignment::Left },
         GridCell { contents: String::from("file3"), width: 5, alignment: Alignment::Left },
@@ -428,7 +428,7 @@ fn test_fit_into_columns_toptobottom_different_alignments() {
         GridCell { contents: String::from("file50"), width: 6, alignment: Alignment::Left },
     ];
 
-    let grid = Grid::new("  ", Direction::TopToBottom, &cells_slice);
+    let grid = Grid::new("  ", Direction::TopToBottom, &cells);
     let display = grid.fit_into_columns(5);
 
     assert_eq!(
@@ -442,7 +442,7 @@ fn test_fit_into_columns_toptobottom_different_alignments() {
 #[test]
 fn test_fit_into_columns_toptobottom_different_alignments_color() {
     #[rustfmt::skip]
-    let cells_slice: [GridCell; 15] = [
+    let cells: [GridCell; 15] = [
         GridCell { contents: String::from("\x1b[31mfile10\x1b[0m"), width: 6, alignment: Alignment::Left },
         GridCell { contents: String::from("\x1b[32mfile20\x1b[0m"), width: 6, alignment: Alignment::Left },
         GridCell { contents: String::from("\x1b[33mfile3\x1b[0m"), width: 5, alignment: Alignment::Left },
@@ -462,7 +462,7 @@ fn test_fit_into_columns_toptobottom_different_alignments_color() {
         GridCell { contents: String::from("\x1b[35mfile50\x1b[0m"), width: 6, alignment: Alignment::Left },
     ];
 
-    let grid = Grid::new("  ", Direction::TopToBottom, &cells_slice);
+    let grid = Grid::new("  ", Direction::TopToBottom, &cells);
     let display = grid.fit_into_columns(5);
 
     // if evaluated in a output device which renders ansi escape sequences

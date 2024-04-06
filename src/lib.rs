@@ -90,24 +90,24 @@ impl From<String> for GridCell {
 
 /// The main struct used to format GridCells in a grid like format similar to `ls`
 #[derive(Debug, Default)]
-pub struct Grid<'a, 'b> {
-    cells_slice: &'a [GridCell],
-    seperator: Cow<'b, str>,
+pub struct Grid<'cells, 'seperator> {
+    cells: &'cells [GridCell],
+    seperator: Cow<'seperator, str>,
     seperator_width: usize,
     direction: Direction,
 }
 
-impl<'a, 'b> Grid<'a, 'b> {
+impl<'cells, 'seperator> Grid<'cells, 'seperator> {
     /// Create a new Grid
-    pub fn new<S>(seperator: S, direction: Direction, cells_slice: &'a [GridCell]) -> Grid<'a, 'b>
+    pub fn new<S>(seperator: S, direction: Direction, cells: &'cells [GridCell]) -> Self
     where
-        S: Into<Cow<'b, str>>,
+        S: Into<Cow<'seperator, str>>,
     {
         let seperator: Cow<'_, str> = seperator.into();
         let seperator_width = UnicodeWidthStr::width(&*seperator);
 
-        Grid {
-            cells_slice,
+        Self {
+            cells,
             seperator,
             seperator_width,
             direction,
@@ -115,11 +115,11 @@ impl<'a, 'b> Grid<'a, 'b> {
     }
 
     pub(crate) fn total_cell_count(&self) -> usize {
-        self.cells_slice.len()
+        self.cells.len()
     }
 
     /// Returns a displayable containing the specified number of columns
-    pub fn fit_into_columns(&self, num_columns: usize) -> Display<'_, '_> {
+    pub fn fit_into_columns(&self, num_columns: usize) -> Display<'_> {
         let dimentions = self.calculate_dimentions(num_columns);
 
         Display {
@@ -131,30 +131,21 @@ impl<'a, 'b> Grid<'a, 'b> {
     /// Returns a well packed displayable grid fitted within display width
     ///
     /// Returns `None` if one of the GridCell contains a width greator than the display width
-    pub fn fit_into_width(&self, display_width: usize) -> Option<Display<'_, '_>> {
-        if self.cells_slice.is_empty() {
+    pub fn fit_into_width(&self, display_width: usize) -> Option<Display<'_>> {
+        if self.cells.is_empty() {
             return Some(Display {
                 dimentions: Dimentions::one_row(0),
                 grid: self,
             });
         }
-        let max_cell_width: usize = self
-            .cells_slice
-            .iter()
-            .map(|cell| cell.width)
-            .max()
-            .unwrap_or(0);
+        let max_cell_width: usize = self.cells.iter().map(|cell| cell.width).max().unwrap_or(0);
 
         // return `None` if there is a `DisplayCell` whose width is
         // greator than or equal than display_width
         if max_cell_width >= display_width {
             None
         } else {
-            let total_width: usize = (self
-                .cells_slice
-                .iter()
-                .map(|cell| cell.width)
-                .sum::<usize>())
+            let total_width: usize = (self.cells.iter().map(|cell| cell.width).sum::<usize>())
                 + (self.total_cell_count() - 1) * self.seperator_width;
 
             // if total width width is <= display_width, display all `DisplayCell` in one row
@@ -169,11 +160,7 @@ impl<'a, 'b> Grid<'a, 'b> {
         }
     }
 
-    fn internal_fit_into_width(
-        &self,
-        max_cell_width: usize,
-        display_width: usize,
-    ) -> Display<'_, '_> {
+    fn internal_fit_into_width(&self, max_cell_width: usize, display_width: usize) -> Display<'_> {
         let total_cell_count = self.total_cell_count();
         // choose the starting num_columns by using the max DisplayCell width
         // with seperator spaces
@@ -205,7 +192,7 @@ impl<'a, 'b> Grid<'a, 'b> {
         let num_rows = usize_div_ceil(self.total_cell_count(), num_columns);
         let mut column_widths: Vec<usize> = vec![0; num_columns];
 
-        for (cell_index, cell) in self.cells_slice.iter().enumerate() {
+        for (cell_index, cell) in self.cells.iter().enumerate() {
             let column_index = match self.direction {
                 Direction::LeftToRight => cell_index % num_columns,
                 Direction::TopToBottom => cell_index / num_rows,
@@ -223,12 +210,12 @@ impl<'a, 'b> Grid<'a, 'b> {
 
 /// The displayable represntation of [`Grid`](struct.Grid.html)
 #[derive(Debug)]
-pub struct Display<'a, 'b> {
+pub struct Display<'grid> {
     dimentions: Dimentions,
-    grid: &'a Grid<'a, 'b>,
+    grid: &'grid Grid<'grid, 'grid>,
 }
 
-impl fmt::Display for Display<'_, '_> {
+impl fmt::Display for Display<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let total_cell_count = self.grid.total_cell_count();
         if total_cell_count == 0 {
@@ -253,7 +240,7 @@ impl fmt::Display for Display<'_, '_> {
                 }
 
                 cell_count += 1;
-                let cell = &self.grid.cells_slice[cell_index];
+                let cell = &self.grid.cells[cell_index];
 
                 // if (the current column is the last column or is the last cell)
                 // and the cell is left aligned, the cell does not need to be

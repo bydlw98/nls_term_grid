@@ -20,7 +20,7 @@ The Grid API and Implementation is inspired by [ogham/term_grid](https://crates.
 ```rust
 use nls_term_grid::{Grid, GridCell, Direction, Alignment};
 
-let cells_slice: [GridCell; 15] = [
+let cells: [GridCell; 15] = [
     GridCell::from(String::from("file10")),
     GridCell::from(String::from("file20")),
     GridCell::from(String::from("file3")),
@@ -40,7 +40,7 @@ let cells_slice: [GridCell; 15] = [
     GridCell::from(String::from("file50")),
 ];
 
-let grid = Grid::new("  ", Direction::LeftToRight, &cells_slice);
+let grid = Grid::new("  ", Direction::LeftToRight, &cells);
 let display = grid.fit_into_width(35).unwrap();
 
 assert_eq!(
