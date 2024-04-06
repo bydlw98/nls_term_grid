@@ -15,13 +15,6 @@ The Grid API and Implementation is inspired by [ogham/term_grid](https://crates.
 
 ---
 
-## Installation
-
-```toml
-[dependencies]
-nls_term_grid = "0.1.0"
-```
-
 ## Example
 
 ```rust
