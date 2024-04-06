@@ -1,6 +1,6 @@
 [package]
 name = "nls_term_grid"
-version = "0.1.1"
+version = "0.2.0"
 edition = "2021"
 categories = ["command-line-interface"]
 description = "Library for arranging textual data in a grid format similar to ls"
