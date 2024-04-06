@@ -47,7 +47,7 @@ let cells_slice: [GridCell; 15] = [
     GridCell::from(String::from("file50")),
 ];
 
-let grid = Grid::new(2, Direction::LeftToRight, &cells_slice);
+let grid = Grid::new("  ", Direction::LeftToRight, &cells_slice);
 let display = grid.fit_into_width(35).unwrap();
 
 assert_eq!(

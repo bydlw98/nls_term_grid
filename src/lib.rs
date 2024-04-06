@@ -3,6 +3,7 @@
 
 extern crate alloc;
 
+use alloc::borrow::Cow;
 use alloc::string::String;
 use alloc::vec;
 use alloc::vec::Vec;
@@ -89,18 +90,26 @@ impl From<String> for GridCell {
 
 /// The main struct used to format GridCells in a grid like format similar to `ls`
 #[derive(Debug, Default)]
-pub struct Grid<'a> {
+pub struct Grid<'a, 'b> {
     cells_slice: &'a [GridCell],
-    num_spaces: usize,
+    seperator: Cow<'b, str>,
+    seperator_width: usize,
     direction: Direction,
 }
 
-impl<'a> Grid<'a> {
+impl<'a, 'b> Grid<'a, 'b> {
     /// Create a new Grid
-    pub fn new(num_spaces: usize, direction: Direction, cells_slice: &[GridCell]) -> Grid {
+    pub fn new<S>(seperator: S, direction: Direction, cells_slice: &'a [GridCell]) -> Grid<'a, 'b>
+    where
+        S: Into<Cow<'b, str>>,
+    {
+        let seperator: Cow<'_, str> = seperator.into();
+        let seperator_width = UnicodeWidthStr::width(&*seperator);
+
         Grid {
             cells_slice,
-            num_spaces,
+            seperator,
+            seperator_width,
             direction,
         }
     }
@@ -110,7 +119,7 @@ impl<'a> Grid<'a> {
     }
 
     /// Returns a displayable containing the specified number of columns
-    pub fn fit_into_columns(&self, num_columns: usize) -> Display<'_> {
+    pub fn fit_into_columns(&self, num_columns: usize) -> Display<'_, '_> {
         let dimentions = self.calculate_dimentions(num_columns);
 
         Display {
@@ -122,7 +131,7 @@ impl<'a> Grid<'a> {
     /// Returns a well packed displayable grid fitted within display width
     ///
     /// Returns `None` if one of the GridCell contains a width greator than the display width
-    pub fn fit_into_width(&self, display_width: usize) -> Option<Display<'_>> {
+    pub fn fit_into_width(&self, display_width: usize) -> Option<Display<'_, '_>> {
         if self.cells_slice.is_empty() {
             return Some(Display {
                 dimentions: Dimentions::one_row(0),
@@ -146,7 +155,7 @@ impl<'a> Grid<'a> {
                 .iter()
                 .map(|cell| cell.width)
                 .sum::<usize>())
-                + (self.total_cell_count() - 1) * self.num_spaces;
+                + (self.total_cell_count() - 1) * self.seperator_width;
 
             // if total width width is <= display_width, display all `DisplayCell` in one row
             if total_width <= display_width {
@@ -160,11 +169,15 @@ impl<'a> Grid<'a> {
         }
     }
 
-    fn internal_fit_into_width(&self, max_cell_width: usize, display_width: usize) -> Display<'_> {
+    fn internal_fit_into_width(
+        &self,
+        max_cell_width: usize,
+        display_width: usize,
+    ) -> Display<'_, '_> {
         let total_cell_count = self.total_cell_count();
         // choose the starting num_columns by using the max DisplayCell width
         // with seperator spaces
-        let mut num_columns = display_width / (max_cell_width + self.num_spaces);
+        let mut num_columns = display_width / (max_cell_width + self.seperator_width);
         let mut dimentions = self.calculate_dimentions(num_columns);
 
         // increase the num_columns to find the dimentions where grid is most well packed
@@ -173,7 +186,7 @@ impl<'a> Grid<'a> {
             let new_dimentions = self.calculate_dimentions(num_columns);
 
             // stop increasing num_columns if total width is greator than display_width
-            if new_dimentions.total_width(self.num_spaces) > display_width {
+            if new_dimentions.total_width(self.seperator_width) > display_width {
                 break;
             }
             // use new_dimentions as dimentions if it is well packed
@@ -210,12 +223,12 @@ impl<'a> Grid<'a> {
 
 /// The displayable represntation of [`Grid`](struct.Grid.html)
 #[derive(Debug)]
-pub struct Display<'a> {
+pub struct Display<'a, 'b> {
     dimentions: Dimentions,
-    grid: &'a Grid<'a>,
+    grid: &'a Grid<'a, 'b>,
 }
 
-impl fmt::Display for Display<'_> {
+impl fmt::Display for Display<'_, '_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let total_cell_count = self.grid.total_cell_count();
         if total_cell_count == 0 {
@@ -251,7 +264,7 @@ impl fmt::Display for Display<'_> {
                     write!(f, "{}", cell.contents)?;
                 } else {
                     cell.write(f, self.dimentions.column_widths[column_index])?;
-                    write!(f, "{}", " ".repeat(self.grid.num_spaces))?;
+                    write!(f, "{}", self.grid.seperator)?;
                 }
             }
             // write a '\n' after the last column in row
