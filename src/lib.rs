@@ -48,16 +48,16 @@ impl Default for Alignment {
 
 /// A textual string containing its display width and alignment
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
-pub struct GridCell {
+pub struct GridCell<D: fmt::Display> {
     /// The textual string displayed when written
-    pub contents: String,
+    pub contents: D,
     /// The display width of contents in columns
     pub width: usize,
     /// Whether contents is (left/right) aligned when padding is required
     pub alignment: Alignment,
 }
 
-impl GridCell {
+impl<D: fmt::Display> GridCell<D> {
     pub(crate) fn write<F: fmt::Write>(&self, f: &mut F, width: usize) -> fmt::Result {
         let pad_width: usize = if width <= self.width {
             0
@@ -77,7 +77,7 @@ impl GridCell {
     }
 }
 
-impl From<String> for GridCell {
+impl From<String> for GridCell<String> {
     fn from(value: String) -> Self {
         let width = UnicodeWidthStr::width(&*value);
 
@@ -91,16 +91,16 @@ impl From<String> for GridCell {
 
 /// The main struct used to format GridCells in a grid like format similar to `ls`
 #[derive(Debug, Default)]
-pub struct Grid<'cells, 'seperator> {
-    cells: &'cells [GridCell],
+pub struct Grid<'cells, 'seperator, D: fmt::Display> {
+    cells: &'cells [GridCell<D>],
     seperator: Cow<'seperator, str>,
     seperator_width: usize,
     direction: Direction,
 }
 
-impl<'cells, 'seperator> Grid<'cells, 'seperator> {
+impl<'cells, 'seperator, D: fmt::Display> Grid<'cells, 'seperator, D> {
     /// Create a new Grid
-    pub fn new<S>(seperator: S, direction: Direction, cells: &'cells [GridCell]) -> Self
+    pub fn new<S>(seperator: S, direction: Direction, cells: &'cells [GridCell<D>]) -> Self
     where
         S: Into<Cow<'seperator, str>>,
     {
@@ -121,7 +121,7 @@ impl<'cells, 'seperator> Grid<'cells, 'seperator> {
     }
 
     /// Returns a displayable containing the specified number of columns
-    pub fn fit_into_columns(&self, num_columns: usize) -> Display<'_> {
+    pub fn fit_into_columns(&self, num_columns: usize) -> Display<'_, D> {
         let dimentions = self.calculate_dimentions(num_columns);
 
         Display {
@@ -133,7 +133,7 @@ impl<'cells, 'seperator> Grid<'cells, 'seperator> {
     /// Returns a well packed displayable grid fitted within display width
     ///
     /// Returns `None` if one of the GridCell contains a width greator than the display width
-    pub fn fit_into_width(&self, display_width: usize) -> Option<Display<'_>> {
+    pub fn fit_into_width(&self, display_width: usize) -> Option<Display<'_, D>> {
         if self.cells.is_empty() {
             return Some(Display {
                 dimentions: Dimentions::one_row(0),
@@ -162,7 +162,11 @@ impl<'cells, 'seperator> Grid<'cells, 'seperator> {
         }
     }
 
-    fn internal_fit_into_width(&self, max_cell_width: usize, display_width: usize) -> Display<'_> {
+    fn internal_fit_into_width(
+        &self,
+        max_cell_width: usize,
+        display_width: usize,
+    ) -> Display<'_, D> {
         let total_cell_count = self.total_cell_count();
         // choose the starting num_columns by using the max DisplayCell width
         // with seperator spaces
@@ -212,12 +216,12 @@ impl<'cells, 'seperator> Grid<'cells, 'seperator> {
 
 /// The displayable represntation of [`Grid`](struct.Grid.html)
 #[derive(Debug)]
-pub struct Display<'grid> {
+pub struct Display<'grid, D: fmt::Display> {
     dimentions: Dimentions,
-    grid: &'grid Grid<'grid, 'grid>,
+    grid: &'grid Grid<'grid, 'grid, D>,
 }
 
-impl fmt::Display for Display<'_> {
+impl<D: fmt::Display> fmt::Display for Display<'_, D> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let total_cell_count = self.grid.total_cell_count();
         if total_cell_count == 0 {

@@ -18,7 +18,9 @@ The Grid API and Implementation is inspired by [ogham/term_grid](https://crates.
 ## Example
 
 ```rust
-use nls_term_grid::{Grid, GridCell, Direction, Alignment};
+use nls_term_grid::{Grid, Direction, Alignment};
+
+type GridCell = nls_term_grid::GridCell<String>;
 
 let cells: [GridCell; 15] = [
     GridCell::from(String::from("file10")),
